@@ -1,15 +1,15 @@
-from C3D_model import C3D
+from .C3D_model import C3D
 
 import torch
 import torch.nn as nn
 
-class C3D_CNN(nn.Module):
+class C3D_features(nn.Module):
 	"""
 	The C3D network as described in [1].
 	"""
 
-	def __init__(self, weights="../weights/c3d.pickle"):
-		super(C3D_CNN, self).__init__()
+	def __init__(self, weights_path="../weights/c3d.pickle"):
+		super(C3D_features, self).__init__()
 
 		layers = self.load_layers(weights)
 
@@ -68,6 +68,6 @@ class C3D_CNN(nn.Module):
 		return h
 
 if __name__ == '__main__':
-	model = C3D_CNN()
+	model = C3D_features()
 	print(model(torch.rand((1, 3, 32, 112, 112))).shape)
-	s = input()
+	#s = input()

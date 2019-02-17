@@ -27,12 +27,9 @@ def get_weight(weight_path):
     
     weights['0'][0] = torch.transpose(torch.tensor(weights['0'][0]), 0, -1)
     weights['0'][1] = torch.tensor(weights['0'][1])
-    print(weights['0'][0].shape)
     
     weights['2'][0] = torch.transpose(torch.tensor(weights['2'][0]), 0, -1)
     weights['2'][1] = torch.tensor(weights['2'][1])
-    print(weights['2'][0].shape)
-        
 
     weights['4'][0] = torch.transpose(torch.tensor(weights['4'][0]), 0, -1)
     weights['4'][1] = torch.tensor(weights['4'][1])
@@ -60,7 +57,6 @@ class anomaly_ann(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        #print("x", x.shape)
         out = self.layer1(x)
         out = self.relu(out)
         

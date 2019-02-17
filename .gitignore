@@ -1,3 +1,5 @@
 c3d.pickle
 weights_L1L2.mat
 *.pyc
+SampleVideos/*
+test.ipynb
