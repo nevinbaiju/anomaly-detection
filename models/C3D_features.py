@@ -11,7 +11,7 @@ class C3D_features(nn.Module):
 	def __init__(self, weights_path="../weights/c3d.pickle"):
 		super(C3D_features, self).__init__()
 
-		layers = self.load_layers(weights)
+		layers = self.load_layers(weights_path)
 
 		self.conv1 = layers[0]
 		self.pool1 = layers[1]
