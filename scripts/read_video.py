@@ -35,8 +35,12 @@ def generate_block(video, segment_length):
 
 			if(len(arr) == (16*segment_length)):
 				X = get_tensor(arr, segment_length)
+				print(X.shape)
 				yield X
-
-	cap.release()
+		else:
+			cap.release()
+			return
 if __name__ == '__main__':
-	generate_block('/home/nevin/nevin/datasets/anomaly detection/arson/Arson016_x264.mp4', 3)
+	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 3)
+	for i, curr_block in enumerate(block):
+		print(i)
