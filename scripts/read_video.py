@@ -4,6 +4,21 @@ from skimage.transform import resize
 import numpy as np
 
 def get_tensor(arr, segment_length):
+	"""
+    Function to convert the given block of frames to tensor of required shape (ch, fr, h, w)
+    
+    Parameters
+    ----------
+    arr 			:list
+         			 List of frames in the current block of frames.
+    segment_length	:int
+    				 The length of the given segment as multipliers of 16.
+    
+    Returns
+    -------
+    weights:     torch.tensor
+                 Tensor of the block in the required shape.
+    """
 	blocc = np.array([cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA) for frame in arr])
 	#blocc = blocc[:, :, 44:44+112, :]
 	blocc = blocc.transpose(3, 0, 1, 2)  # ch, fr, h, w
@@ -15,6 +30,21 @@ def get_tensor(arr, segment_length):
 	return blocc
 
 def generate_block(video, segment_length):
+	"""
+    Function to generate the video segments from the given file.
+    
+    Parameters
+    ----------
+    arr            :str
+         			Path of the video file
+    segment_length :int
+    				The length of the given segment as multipliers of 16.
+    
+    Yields
+    -------
+    Video Segments :torch.tensor
+                    Tensor of the block in the required shape.
+    """
 	cap = cv2.VideoCapture(video)
 	# Check if camera opened successfully
 	i = 0
@@ -35,11 +65,11 @@ def generate_block(video, segment_length):
 
 			if(len(arr) == (16*segment_length)):
 				X = get_tensor(arr, segment_length)
-				print(X.shape)
 				yield X
 		else:
 			cap.release()
 			return
+			
 if __name__ == '__main__':
 	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 3)
 	for i, curr_block in enumerate(block):

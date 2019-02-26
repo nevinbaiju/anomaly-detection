@@ -5,7 +5,8 @@ import torch.nn as nn
 
 class C3D_features(nn.Module):
 	"""
-	The C3D network as described in [1].
+	The C3D network as described in [1] with features extracted from fc6.
+	Pytorch implementation by DavideA at https://github.com/DavideA/c3d-pytorch.
 	"""
 
 	def __init__(self, weights_path="../weights/c3d.pickle"):
@@ -70,4 +71,10 @@ class C3D_features(nn.Module):
 if __name__ == '__main__':
 	model = C3D_features()
 	print(model(torch.rand((1, 3, 32, 112, 112))).shape)
-	#s = input()
+
+"""
+References
+----------
+[1] Tran, Du, et al. "Learning spatiotemporal features with 3d convolutional networks." 
+Proceedings of the IEEE international conference on computer vision. 2015.
+"""
