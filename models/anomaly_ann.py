@@ -16,7 +16,6 @@ def conv_dict(weights_mat):
     dict        :dict
                  Dictionary of the weights with weights as list.
     """
-    print(type(weights_mat))
     i = 0
     dict = {}
     for i in range(len(weights_mat)):
