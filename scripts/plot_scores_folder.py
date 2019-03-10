@@ -1,7 +1,7 @@
 # This script plots the scores for the videos in a folder
 
 import torch
-from models.C3D_features import C3D_features
+from ...models.C3D_features import C3D_features
 from models.anomaly_ann import anomaly_ann
 
 import matplotlib.pyplot as plt
@@ -29,12 +29,21 @@ def plot_score(score_arr, base_path, filename):
 	-------
 	None
 	"""
+	#score_arr = rolling_mean(score_arr, 5)
 	if not(os.path.exists(base_path)):
 			os.mkdir(base_path)
-	fig = plt.figure()
+	#fig = plt.figure()
 	plt.plot(score_arr)
-	fig.savefig(os.path.join(base_path, filename))
-	del fig
+	plt.xlabel("Segments")
+	plt.ylabel("Anomaly Score (0-1)")
+	plt.title(filename)
+	plt.axhline(0.6, color='red')
+	blue_line = mlines.Line2D([], [], color='blue', label='Anomaly Score')
+	red_line = mlines.Line2D([], [], color='red', label='Anomaly Threshold')
+	plt.legend(handles=[blue_line, red_line])
+	#plt.show()
+	plt.savefig(os.path.join(base_path, filename))
+	#del fig
 	plt.close('all')
 
 def predict_scores(c3d, anomaly_ann, filename, seg_length, base_path):
