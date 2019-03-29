@@ -1,24 +1,25 @@
-from mysql import connector
+import mysql.connector
 
 class db:
-    def __init__(self):
-        mydb = mysql.connector.connect(
-                                          host="localhost",
-                                          user="arundhati",
-                                          passwd="arundhati",
-                                          database="user"
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+        self.mydb = mysql.connector.connect(
+                                              host="localhost",
+                                              user="nevin",
+                                              passwd="password",
+                                              database="anomaly"
                                         )
-        self.mycursor = mydb.cursor()
+        self.mycursor = self.mydb.cursor()
     def push(self, args):
         query = "INSERT INTO anomaly(timestamp, score) " \
                 "VALUES(%s,%s)"
         try:
             self.mycursor.execute(query, args)
-            mydb.commit()
-            if(verbose):
+            self.mydb.commit()
+            if(self.verbose):
                 print("Data committed")
-        except:
-            if(verbose):
-                print("Error")
-            mydb.rollback()
+        except Exception as E:
+            if(self.verbose):
+                print("Error ", E)
+            self.mydb.rollback()
             print("Data committed")
