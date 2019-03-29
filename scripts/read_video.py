@@ -71,6 +71,6 @@ def generate_block(video, segment_length):
 			return
 			
 if __name__ == '__main__':
-	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 3)
+	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 5)
 	for i, curr_block in enumerate(block):
-		print(i)
+		print(curr_block.shape)

@@ -75,6 +75,6 @@ if __name__ == '__main__':
 """
 References
 ----------
-[1] Tran, Du, et al. "Learning spatiotemporal features with 3d convolutional networks." 
+[1] Tran, Du, et al. "Learning spatiotemporal features with 3d convolutional networks."
 Proceedings of the IEEE international conference on computer vision. 2015.
 """
