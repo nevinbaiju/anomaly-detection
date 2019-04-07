@@ -49,10 +49,11 @@ text_pos = (10, 30)
 
 for i, block in enumerate(vid):
     score = detector.predict(block['block'])*100
-    #print(score)
-    cv2.putText(block['preview'], "%d percent"%score, text_pos, font, 1, (255, 255, 255))
-    cv2.imshow('preview', block['preview'])
-    key = cv2.waitKey(20)
-    if(key==27):
-        break
+    preview = block['preview']
+    for frame in preview:
+        cv2.putText(frame, "%d percent"%score, text_pos, font, 1, (255, 255, 255))
+        cv2.imshow('preview', frame)
+        key = cv2.waitKey(20)
+        if(key==27):
+            break
     #process_score(score)
