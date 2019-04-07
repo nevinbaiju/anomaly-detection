@@ -6,14 +6,14 @@ import numpy as np
 def get_tensor(arr, segment_length):
 	"""
     Function to convert the given block of frames to tensor of required shape (ch, fr, h, w)
-    
+
     Parameters
     ----------
     arr 			:list
          			 List of frames in the current block of frames.
     segment_length	:int
     				 The length of the given segment as multipliers of 16.
-    
+
     Returns
     -------
     weights:     torch.tensor
@@ -29,17 +29,17 @@ def get_tensor(arr, segment_length):
 	blocc = torch.from_numpy(blocc)
 	return blocc
 
-def generate_block(video, segment_length):
+def generate_block(video, segment_length, return_frame=False):
 	"""
     Function to generate the video segments from the given file.
-    
+
     Parameters
     ----------
     arr            :str
          			Path of the video file
     segment_length :int
     				The length of the given segment as multipliers of 16.
-    
+
     Yields
     -------
     Video Segments :torch.tensor
@@ -50,11 +50,14 @@ def generate_block(video, segment_length):
 	i = 0
 	arr = []
 	frame_counter = 0
+	curr_frame = []
 	while(cap.isOpened()):
 		# Capture frame-by-frame
 		ret, frame = cap.read()
 		#print(frame)
 		if (ret == True):
+			if((i == 0) and return_frame):
+				curr_frame = frame
 			if(i<16*segment_length):
 				arr.append(frame)
 				i+=1
@@ -65,12 +68,15 @@ def generate_block(video, segment_length):
 
 			if(len(arr) == (16*segment_length)):
 				X = get_tensor(arr, segment_length)
-				yield X
+				if(return_frame):
+					yield {'preview': curr_frame, 'block': X}
+				else:
+					yield {'block': X}
 		else:
 			cap.release()
 			return
-			
+
 if __name__ == '__main__':
-	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 5)
+	block = generate_block('../SampleVideos/videos/RoadAccidents022_x264.mp4', 3)
 	for i, curr_block in enumerate(block):
-		print(curr_block.shape)
+		print(i)
