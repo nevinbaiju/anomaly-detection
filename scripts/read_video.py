@@ -56,8 +56,6 @@ def generate_block(video, segment_length, return_frame=False):
 		ret, frame = cap.read()
 		#print(frame)
 		if (ret == True):
-			if((i == 0) and return_frame):
-				curr_frame = frame
 			if(i<16*segment_length):
 				arr.append(frame)
 				i+=1
@@ -69,7 +67,7 @@ def generate_block(video, segment_length, return_frame=False):
 			if(len(arr) == (16*segment_length)):
 				X = get_tensor(arr, segment_length)
 				if(return_frame):
-					yield {'preview': curr_frame, 'block': X}
+					yield {'preview': arr, 'block': X}
 				else:
 					yield {'block': X}
 		else:
