@@ -1,6 +1,7 @@
 import torch
 import cv2
 from skimage.transform import resize
+from torchvision.transforms import Normalize, Compose, Resize, ToPILImage, ToTensor
 import numpy as np
 
 def get_tensor(arr, segment_length):
@@ -19,14 +20,20 @@ def get_tensor(arr, segment_length):
     weights:     torch.tensor
                  Tensor of the block in the required shape.
     """
-	blocc = np.array([cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA) for frame in arr])
+	transforms = Compose([\
+                          ToPILImage(),\
+                          Resize((112, 112), interpolation=2),\
+                          ToTensor(),\
+                          Normalize(mean=opt.mean, std=opt.std)\
+                     ])
+	blocc = [transforms(img).view(1, 3, 112, 112) for img in arr] #np.array([cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA) for frame in arr])
 	#blocc = blocc[:, :, 44:44+112, :]
-	blocc = blocc.transpose(3, 0, 1, 2)  # ch, fr, h, w
+	#blocc = blocc.transpose(3, 0, 1, 2)  # ch, fr, h, w
 	#blocc = np.expand_dims(blocc, axis=0)  # batch axis
-	blocc = np.array(np.split(blocc, segment_length, axis=1))
+	#blocc = np.array(np.split(blocc, segment_length, axis=1))
 	#blocc = (blocc-blocc.mean())/(blocc.max()-blocc.mean())
-	blocc = np.float32(blocc)
-	blocc = torch.from_numpy(blocc)
+	#blocc = np.float32(blocc)
+	#blocc = torch.from_numpy(blocc)
 	return blocc
 
 def generate_block(video, segment_length, return_frame=False):
@@ -57,7 +64,7 @@ def generate_block(video, segment_length, return_frame=False):
 		#print(frame)
 		if (ret == True):
 			if(i<16*segment_length):
-				arr.append(frame)
+				arr.append(frame) #cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA)
 				i+=1
 				frame_counter +=1
 			else:
