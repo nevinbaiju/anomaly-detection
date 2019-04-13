@@ -33,7 +33,7 @@ weights_dict = {'c3d' : 'weights/c3d.pickle', 'ann': 'weights/weights_L1L2.mat'}
 verbose = True
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--vid", type=str, default='/home/nevin/priyanka.mp4')
+parser.add_argument("--vid", type=str, default='SampleVideos/videos/RoadAccidents022_x264.mp4')
 args = parser.parse_args()
 
 filename = args.vid
@@ -49,6 +49,7 @@ text_pos = (10, 30)
 
 for i, block in enumerate(vid):
     score = detector.predict(block['block'])*100
+    print(score)
     preview = block['preview']
     for frame in preview:
         cv2.putText(frame, "%d percent"%score, text_pos, font, 1, (255, 255, 255))
