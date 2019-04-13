@@ -24,7 +24,7 @@ def get_tensor(arr, norm_parameters):
 							  ToPILImage(),\
 							  Resize((112, 112), interpolation=2),\
 							  ToTensor(),\
-							  #Normalize(mean=norm_parameters['mean'], std=norm_parameters['std'])\
+							  Normalize(mean=norm_parameters['mean'], std=norm_parameters['std'])\
 						 ])
 	blocc = [transforms(img).view(1, 3, 112, 112) for img in arr]
 	blocc = torch.cat(blocc)
@@ -32,7 +32,7 @@ def get_tensor(arr, norm_parameters):
 	blocc = blocc.view(1, 3, 16, 112, 112)
 
 	return blocc
-
+	
 def generate_block(video, segment_length, return_frame=False):
 	"""
 	Function to generate the video segments from the given file.
@@ -70,7 +70,7 @@ def generate_block(video, segment_length, return_frame=False):
 				arr = []
 
 			if(len(arr) == (16*segment_length)):
-				X = get_tensor(arr, norm_parameters)
+				X = get_tensor_numpy(arr, norm_parameters)
 				if(return_frame):
 					yield {'preview': arr, 'block': X}
 				else:
