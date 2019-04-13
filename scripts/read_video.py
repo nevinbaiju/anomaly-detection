@@ -4,37 +4,34 @@ from skimage.transform import resize
 from torchvision.transforms import Normalize, Compose, Resize, ToPILImage, ToTensor
 import numpy as np
 
-def get_tensor(arr, segment_length):
-	"""
+def get_tensor(arr, norm_parameters):
+    """
     Function to convert the given block of frames to tensor of required shape (ch, fr, h, w)
 
     Parameters
     ----------
-    arr 			:list
-         			 List of frames in the current block of frames.
-    segment_length	:int
-    				 The length of the given segment as multipliers of 16.
+    arr       :list
+               List of frames in the current block of frames.
+    segment_length  :int
+             The length of the given segment as multipliers of 16.
 
     Returns
     -------
     weights:     torch.tensor
                  Tensor of the block in the required shape.
     """
-	transforms = Compose([\
-                          ToPILImage(),\
-                          Resize((112, 112), interpolation=2),\
-                          ToTensor(),\
-                          Normalize(mean=opt.mean, std=opt.std)\
-                     ])
-	blocc = [transforms(img).view(1, 3, 112, 112) for img in arr] #np.array([cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA) for frame in arr])
-	#blocc = blocc[:, :, 44:44+112, :]
-	#blocc = blocc.transpose(3, 0, 1, 2)  # ch, fr, h, w
-	#blocc = np.expand_dims(blocc, axis=0)  # batch axis
-	#blocc = np.array(np.split(blocc, segment_length, axis=1))
-	#blocc = (blocc-blocc.mean())/(blocc.max()-blocc.mean())
-	#blocc = np.float32(blocc)
-	#blocc = torch.from_numpy(blocc)
-	return blocc
+    transforms = Compose([\
+                              ToPILImage(),\
+                              Resize((112, 112), interpolation=2),\
+                              ToTensor(),\
+                              Normalize(mean=norm_parameters['mean'], std=norm_parameters['std'])\
+                         ])
+    blocc = [transforms(img).view(1, 3, 112, 112) for img in arr]
+    blocc = torch.cat(blocc)
+    blocc = torch.transpose(blocc, 0, 1)
+    blocc = blocc.view(1, 3, 16, 112, 112)
+
+    return blocc
 
 def generate_block(video, segment_length, return_frame=False):
 	"""
