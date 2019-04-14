@@ -23,25 +23,25 @@ def find_length(filename, seg_length=1):
 def generate_c3d_features(c3d, filename):
     """
     Function to process the current video file and generate the c3d fetures.
-    
+
     Parameters
     c3d             :torch.nn.Module
                      The c3d feature extraction model.
     filename        :str
                      The filename of the videos to return the features
-    
+
     Returns
     -------
     features        :numpy.array
                      The features of the video in the required shape.
     """
     total_length = find_length(filename)
-    block = generate_block(filename, 1)
+    block = generate_block(filename)
     start_time = time.time()
     feature_arr = []
     for i, curr_block in enumerate(block):
         print("{}/{}".format(i+1, total_length), sep='\r', end='\r')
-        features = c3d(curr_block)
+        features = c3d(curr_block['block'])
         features = (features - features.mean())/(features.max() - features.mean())
         feature_arr.append(features.detach().numpy())
         del features
@@ -83,7 +83,7 @@ def iterate_folder(base_path, c3d):
         if not(os.path.exists(folder_path)):
             os.mkdir(folder_path)
         pd.DataFrame(np.array(feature_norm_arr, dtype='float16')).to_csv(file_path, header=False)
-                     
+
         print("{}/{} completed".format(i+1, total_files), sep='\r', end='\r')
 
     end_time = time.time() - start_time
@@ -100,7 +100,3 @@ c3d_weights = args.c3d_weights
 net = C3D_features(c3d_weights).eval()
 
 iterate_folder(base_path, net)
-
-
-
-
