@@ -28,6 +28,27 @@ def get_file_list(filename):
         f = file.read()
     return f.split('\n')[:-1]
 
+def get_norm_features(features):
+    """
+    Function to get the normalized features
+    """
+    mult = len(features)//32
+    feature_norm_arr = []
+    for i in range(32):
+        sub_arr = np.linalg.norm(features[i*mult:(i+1)*mult], axis=0)
+        feature_norm_arr.append(sub_arr)
+    return np.array(feature_norm_arr, dtype='float16')
+
+def save_features(features, category):
+    """
+    Function to save the features as csv
+    """
+    folder_path = os.path.join("results", "features", category)
+    file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
+    if not(os.path.exists(folder_path)):
+        os.mkdir(folder_path)
+    pd.DataFrame(features, index=None).to_csv(file_path, header=False)
+
 def generate_c3d_features(c3d, filename):
     """
     Function to process the current video file and generate the c3d fetures.
@@ -83,17 +104,13 @@ def iterate_list(file_list, base_path, c3d):
         print("Processing [{}/{}]".format(i, total_files), sep='\r', end='\r')
         vid_file = vid_file.split('/')[-1]
         features = generate_c3d_features(c3d, os.path.join(base_path, vid_file))
-        mult = len(features)//32
-        feature_norm_arr = []
-        for i in range(32):
-            sub_arr = np.linalg.norm(features[i*mult:(i+1)*mult], axis=0)
-            feature_norm_arr.append(sub_arr)
-        folder_path = os.path.join("results", "features", category)
-        file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
-        if not(os.path.exists(folder_path)):
-            os.mkdir(folder_path)
-        pd.DataFrame(np.array(feature_norm_arr, dtype='float16'), index=None).to_csv(file_path, header=False)
 
+        if not(no_norm):
+            features = get_norm_features(features)
+        save_features(features, category)
+
+    end_time = time.time() - start_time
+    print("total time taken = ", end_time)
 
 def iterate_folder(base_path, c3d):
     """
@@ -118,17 +135,10 @@ def iterate_folder(base_path, c3d):
     for i, vid_file in enumerate(os.listdir(base_path)):
         print("Processing [{}/{}]".format(i, total_files), sep='\r', end='\r')
         features = generate_c3d_features(c3d, os.path.join(base_path, vid_file))
-        mult = len(features)//32
-        feature_norm_arr = []
-        for i in range(32):
-            sub_arr = np.linalg.norm(features[i*mult:(i+1)*mult], axis=0)
-            feature_norm_arr.append(sub_arr)
-        folder_path = os.path.join("results", "features", category)
-        file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
-        if not(os.path.exists(folder_path)):
-            os.mkdir(folder_path)
-        pd.DataFrame(np.array(feature_norm_arr, dtype='float16')).to_csv(file_path, header=False)
 
+        if not(no_norm):
+            features = get_norm_features(features)
+        save_features(features, category)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
@@ -139,6 +149,7 @@ parser.add_argument("--c3d_weights", type=str, default='../weights/c3d.pickle')
 parser.add_argument('--file_list_mode', action='store_true', help='If file list mode is used')
 parser.add_argument("--file_list", type=str, default='')
 parser.add_argument('--no_cuda', action='store_true', help='If cuda should not be used.')
+parser.add_argument('--no_norm', action='store_true', help='Features should not be normalized to 32 features.')
 args = parser.parse_args()
 
 base_path = args.base_path
@@ -146,11 +157,12 @@ c3d_weights = args.c3d_weights
 file_list_mode = args.file_list_mode
 file_list = args.file_list
 no_cuda = args.no_cuda
+no_norm = args.no_norm
 
 if (no_cuda):
     device = torch.device('cpu')
 else:
-    device = torch.device('cpu')
+    device = torch.device('cuda')
 print("Loading model and weights...")
 net = C3D_features(c3d_weights).eval().to(device)
 print("Done!")
