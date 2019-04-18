@@ -76,7 +76,7 @@ def generate_resnet_features(resnet, filename):
         print("\t\t\t\t\t [{}/{}]".format(i+1, total_length), sep='\r', end='\r')
         features = resnet(curr_block['block'])
         features = (features - features.mean())/(features.max() - features.mean())
-        feature_arr.append(features.detach().numpy())
+        feature_arr.append(features.cpu().detach().numpy())
         del features
     total_time = time.time()-start_time
     features = np.rollaxis(np.array(feature_arr), 1 )[0]
