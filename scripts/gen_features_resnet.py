@@ -1,9 +1,13 @@
 # This script iterates over the video files in a folder and writes them in a csv file.
 
 from __future__ import print_function
+
+from models.ResNet_3D.model import generate_model
+from models.ResNet_3D.opts import parse_opts
+from models.ResNet_3D.mean import get_mean, get_std
+
 import torch
-from models.C3D_features import C3D_features
-from models.anomaly_ann import anomaly_ann
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,23 +43,23 @@ def get_norm_features(features):
         feature_norm_arr.append(sub_arr)
     return np.array(feature_norm_arr, dtype='float16')
 
-def save_features(features, category, file_path):
+def save_features(features, category):
     """
     Function to save the features as csv
     """
     folder_path = os.path.join("results", "features", category)
     file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
-    if(os.path.exists(folder_path))
+    if not(os.path.exists(folder_path)):
         os.mkdir(folder_path)
     pd.DataFrame(features, index=None).to_csv(file_path, header=False)
 
-def generate_c3d_features(c3d, filename):
+def generate_resnet_features(resnet, filename):
     """
-    Function to process the current video file and generate the c3d fetures.
+    Function to process the current video file and generate the resnet fetures.
 
     Parameters
-    c3d             :torch.nn.Module
-                     The c3d feature extraction model.
+    resnet          :torch.nn.Module
+                     The resnet feature extraction model.
     filename        :str
                      The filename of the videos to return the features
 
@@ -70,7 +74,7 @@ def generate_c3d_features(c3d, filename):
     feature_arr = []
     for i, curr_block in enumerate(block):
         print("\t\t\t\t\t [{}/{}]".format(i+1, total_length), sep='\r', end='\r')
-        features = c3d(curr_block['block'])
+        features = resnet(curr_block['block'])
         features = (features - features.mean())/(features.max() - features.mean())
         feature_arr.append(features.detach().numpy())
         del features
@@ -78,10 +82,10 @@ def generate_c3d_features(c3d, filename):
     features = np.rollaxis(np.array(feature_arr), 1 )[0]
     return features
 
-def iterate_list(file_list, base_path, c3d):
+def iterate_list(file_list, base_path, resnet):
     """
     Function to iterate over the video files in the given file list
-    and call the function to generate the c3d features and write the
+    and call the function to generate the resnet features and write the
     features in a csv file.
     Parameters
     ----------
@@ -103,26 +107,26 @@ def iterate_list(file_list, base_path, c3d):
     for i, vid_file in enumerate(file_list):
         print("Processing [{}/{}]".format(i, total_files), sep='\r', end='\r')
         vid_file = vid_file.split('/')[-1]
-        features = generate_c3d_features(c3d, os.path.join(base_path, vid_file))
+        features = generate_resnet_features(resnet, os.path.join(base_path, vid_file))
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category, vid_file)
+        save_features(features, category)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
 
-def iterate_folder(base_path, c3d):
+def iterate_folder(base_path, resnet):
     """
     Function to iterate over the video files in the given folder
-    and call the function to generate the c3d features and write the
+    and call the function to generate the resnet features and write the
     features in a csv file.
     Parameters
     ----------
     base_path       :str
                      Path of the folder containing the video files.
-    c3d             :torch.nn.Module
-                     The c3d feature extraction model.
+    resnet          :torch.nn.Module
+                     The resnet feature extraction model.
     Returns
     -------
     None
@@ -134,42 +138,46 @@ def iterate_folder(base_path, c3d):
 
     for i, vid_file in enumerate(os.listdir(base_path)):
         print("Processing [{}/{}]".format(i, total_files), sep='\r', end='\r')
-        features = generate_c3d_features(c3d, os.path.join(base_path, vid_file))
+        features = generate_resnet_features(resnet, os.path.join(base_path, vid_file))
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category, vid_file)
+        save_features(features, category)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--base_path", type=str, default='SampleVideos/videos')
-parser.add_argument("--c3d_weights", type=str, default='weights/c3d.pickle')
-parser.add_argument('--file_list_mode', action='store_true', help='If file list mode is used')
-parser.add_argument("--file_list", type=str, default='')
-parser.add_argument('--no_cuda', action='store_true', help='If cuda should not be used.')
-parser.add_argument('--no_norm', action='store_true', help='Features should not be normalized to 32 features.')
-args = parser.parse_args()
+opt = parse_opts()
 
-base_path = args.base_path
-c3d_weights = args.c3d_weights
-file_list_mode = args.file_list_mode
-file_list = args.file_list
-no_cuda = args.no_cuda
-no_norm = args.no_norm
+opt.mean = get_mean()
+opt.std = get_std()
+opt.arch = '{}-{}'.format(opt.model_name, opt.model_depth)
+opt.sample_size = 112
+opt.sample_duration = 16
+opt.n_classes = 400
+
+base_path = opt.base_path
+file_list_mode = opt.file_list_mode
+file_list = opt.file_list
+no_cuda = opt.no_cuda
+no_norm = opt.no_norm
 
 if (no_cuda):
     device = torch.device('cpu')
 else:
     device = torch.device('cuda')
-print("Loading model and weights...")
-net = C3D_features(c3d_weights).eval().to(device)
+
+model = generate_model(opt)
+print('loading model {}....'.format(opt.model))
+model_data = torch.load(opt.model)
+assert opt.arch == model_data['arch']
+model.load_state_dict(model_data['state_dict'],strict=False)
+model = model.eval()
 print("Done!")
 
 if(file_list_mode):
     assert (os.path.exists(file_list)), "File list not found or not specified."
     vid_list = get_file_list(file_list)
-    iterate_list(base_path=base_path, file_list=vid_list, c3d=net)
+    iterate_list(base_path=base_path, file_list=vid_list, resnet=model)
 else:
-    iterate_folder(base_path, net)
+    iterate_folder(base_path, model)
