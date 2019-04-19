@@ -46,8 +46,7 @@ def save_features(features, category, vid_file):
     folder_path = os.path.join(output_folder, category)
     file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
     if not(os.path.exists(folder_path)):
-        os.mkdirs(output_folder)
-    print(features.shape)
+        os.makedirs(folder_path)
     print("file saved at ", file_path)
     pd.DataFrame(features, index=None).to_csv(file_path, header=False)
 
@@ -72,9 +71,9 @@ def generate_c3d_features(c3d, filename):
     feature_arr = []
     for i, curr_block in enumerate(block):
         print("\t\t\t\t\t [{}/{}]".format(i+1, total_length), sep='\r', end='\r')
-        features = c3d(curr_block['block'])
+        features = c3d(curr_block['block'].to(device))
         features = (features - features.mean())/(features.max() - features.mean())
-        feature_arr.append(features.detach().numpy())
+        feature_arr.append(features.cpu().detach().numpy())
         del features
     total_time = time.time()-start_time
     features = np.rollaxis(np.array(feature_arr), 1 )[0]
