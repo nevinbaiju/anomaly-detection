@@ -4,7 +4,7 @@ def parse_opts():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_path', default='', type=str, help='Root path of input videos')
     parser.add_argument('--model', default='', type=str, help='Model file path')
-    parser.add_argument('--output', default='output.json', type=str, help='Output file path')
+    parser.add_argument('--output_dir', default='.', type=str, help='Output folder path')
     parser.add_argument('--mode', default='score', type=str, help='Mode (score | feature). score outputs class scores. feature outputs features (after global average pooling).')
     parser.add_argument('--model_name', default='resnet', type=str, help='Currently only support resnet')
     parser.add_argument('--model_depth', default=101, type=int, help='Depth of resnet (10 | 18 | 34 | 50 | 101)')
