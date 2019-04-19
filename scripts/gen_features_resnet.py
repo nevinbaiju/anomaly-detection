@@ -43,14 +43,14 @@ def get_norm_features(features):
         feature_norm_arr.append(sub_arr)
     return np.array(feature_norm_arr, dtype='float16')
 
-def save_features(features, category):
+def save_features(features, category, vid_file):
     """
     Function to save the features as csv
     """
-    folder_path = os.path.join("results", "features", category)
+    folder_path = os.path.join("results", "features", "c3d-2", "no_norm", category)
     file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
     if not(os.path.exists(folder_path)):
-        os.mkdir(folder_path)
+        os.mkdirs(folder_path)
     pd.DataFrame(features, index=None).to_csv(file_path, header=False)
 
 def generate_resnet_features(resnet, filename):
@@ -111,7 +111,7 @@ def iterate_list(file_list, base_path, resnet):
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category)
+        save_features(features, category, vid_file)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
@@ -139,10 +139,11 @@ def iterate_folder(base_path, resnet):
     for i, vid_file in enumerate(os.listdir(base_path)):
         print("Processing [{}/{}]".format(i, total_files), sep='\r', end='\r')
         features = generate_resnet_features(resnet, os.path.join(base_path, vid_file))
+        print(features.shape, vid_file)
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category)
+        save_features(features, category, vid_file)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)

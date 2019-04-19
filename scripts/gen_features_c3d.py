@@ -39,14 +39,16 @@ def get_norm_features(features):
         feature_norm_arr.append(sub_arr)
     return np.array(feature_norm_arr, dtype='float16')
 
-def save_features(features, category):
+def save_features(features, category, vid_file):
     """
     Function to save the features as csv
     """
-    folder_path = os.path.join("results", "features", category)
+    folder_path = os.path.join(output_folder, category)
     file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
     if not(os.path.exists(folder_path)):
-        os.mkdir(folder_path)
+        os.mkdirs(output_folder)
+    print(features.shape)
+    print("file saved at ", file_path)
     pd.DataFrame(features, index=None).to_csv(file_path, header=False)
 
 def generate_c3d_features(c3d, filename):
@@ -107,7 +109,7 @@ def iterate_list(file_list, base_path, c3d):
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category)
+        save_features(features, category, vid_file)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
@@ -138,13 +140,14 @@ def iterate_folder(base_path, c3d):
 
         if not(no_norm):
             features = get_norm_features(features)
-        save_features(features, category)
+        save_features(features, category, vid_file)
 
     end_time = time.time() - start_time
     print("total time taken = ", end_time)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--base_path", type=str, default='../SampleVideos/videos')
+parser.add_argument("--output_folder", type=str, default='.')
 parser.add_argument("--c3d_weights", type=str, default='../weights/c3d.pickle')
 parser.add_argument('--file_list_mode', action='store_true', help='If file list mode is used')
 parser.add_argument("--file_list", type=str, default='')
@@ -153,6 +156,7 @@ parser.add_argument('--no_norm', action='store_true', help='Features should not 
 args = parser.parse_args()
 
 base_path = args.base_path
+output_folder = args.output_folder
 c3d_weights = args.c3d_weights
 file_list_mode = args.file_list_mode
 file_list = args.file_list
