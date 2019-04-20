@@ -139,6 +139,7 @@ def iterate_folder(base_path, c3d):
 
         if not(no_norm):
             features = get_norm_features(features)
+        print('\n', features.shape)
         save_features(features, category, vid_file)
 
     end_time = time.time() - start_time
