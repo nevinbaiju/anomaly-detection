@@ -33,6 +33,32 @@ def get_tensor(arr, norm_parameters):
 
 	return blocc
 
+def get_tensor2(arr, segment_length=1):
+	"""
+    Function to convert the given block of frames to tensor of required shape (ch, fr, h, w)
+
+    Parameters
+    ----------
+    arr 			:list
+         			 List of frames in the current block of frames.
+    segment_length	:int
+    				 The length of the given segment as multipliers of 16.
+
+    Returns
+    -------
+    weights:     torch.tensor
+                 Tensor of the block in the required shape.
+    """
+	blocc = np.array([cv2.resize(frame, (112, 112), interpolation = cv2.INTER_AREA) for frame in arr])
+	#blocc = blocc[:, :, 44:44+112, :]
+	blocc = blocc.transpose(3, 0, 1, 2)  # ch, fr, h, w
+	#blocc = np.expand_dims(blocc, axis=0)  # batch axis
+	blocc = np.array(np.split(blocc, segment_length, axis=1))
+	#blocc = (blocc-blocc.mean())/(blocc.max()-blocc.mean())
+	blocc = np.float32(blocc)
+	blocc = torch.from_numpy(blocc)
+	return blocc
+
 def generate_block(video, segment_length=1, return_frame=False):
 	"""
 	Function to generate the video segments from the given file.
@@ -70,7 +96,8 @@ def generate_block(video, segment_length=1, return_frame=False):
 				arr = []
 
 			if(len(arr) == (16*segment_length)):
-				X = get_tensor(arr, norm_parameters)
+				#X = get_tensor(arr, norm_parameters)
+				X = get_tensor2(arr)
 				if(return_frame):
 					yield {'preview': arr, 'block': X}
 				else:
