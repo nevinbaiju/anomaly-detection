@@ -47,7 +47,7 @@ def save_features(features, category, vid_file):
     """
     Function to save the features as csv
     """
-    folder_path = os.path.join("results", "features", "c3d-2", "no_norm", category)
+    folder_path = os.path.join(output_dir, category)
     file_path = os.path.join(folder_path, vid_file.split('.')[0]+'.csv')
     if not(os.path.exists(folder_path)):
         os.mkdirs(folder_path)
@@ -162,6 +162,7 @@ file_list_mode = opt.file_list_mode
 file_list = opt.file_list
 no_cuda = opt.no_cuda
 no_norm = opt.no_norm
+output_dir = args.output_dir
 
 if (no_cuda):
     device = torch.device('cpu')
