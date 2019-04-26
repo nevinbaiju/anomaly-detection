@@ -8,4 +8,4 @@ def get_min_max(filename=''):
         max = current.max_val
         return min, max
     else:
-        return -1800, 2000
+        return -1500, 1800
