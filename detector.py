@@ -22,6 +22,8 @@ parser.add_argument("--vid", type=str, default='SampleVideos/videos/RoadAccident
 args = parser.parse_args()
 
 filename = args.vid
+if filename == '0':
+    filename = 0
 
 #db_access = db()
 vid = generate_block(filename, 1, return_frame=True)
