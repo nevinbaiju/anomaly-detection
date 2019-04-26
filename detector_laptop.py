@@ -2,6 +2,7 @@ from models.anomaly_ann import anomaly_ann
 import pandas as pd
 import torch
 from misc.min_max import get_min_max
+from misc.process_score import process_score
 
 #from scripts.db import db
 from scripts.read_video import generate_block
@@ -66,6 +67,7 @@ for i, block in enumerate(vid):
         score = -score
     elif(score>1):
         score = 1
+    process_score(score)
     disp_score = score*100
     print(score)
     preview = block['preview']
@@ -76,4 +78,3 @@ for i, block in enumerate(vid):
         key = cv2.waitKey(20)
         if(key==27):
             break
-    #process_score(score)

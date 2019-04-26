@@ -3,6 +3,7 @@ from models.anomaly_detector import anomaly_detector
 #from scripts.db import db
 from scripts.read_video import generate_block
 from misc.min_max import get_min_max
+from misc.process_score import process_score
 #from scripts.mail import send_mail
 
 import time
@@ -47,6 +48,7 @@ for i, block in enumerate(vid):
         score = -score
     elif(score>1):
         score = 1
+    process_score(score)
     disp_score = score*100
     print(score)
     preview = block['preview']
