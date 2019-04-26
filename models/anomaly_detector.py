@@ -8,7 +8,7 @@ class anomaly_detector():
 	This class combines the C3D feature extracter and the anomaly detection
     ANN and provides a framework for prediction.
 	"""
-    def __init__(self, weights_dict):
+    def __init__(self, weights_dict, no_sigmoid):
         """
         __init__ function.
 
@@ -21,7 +21,7 @@ class anomaly_detector():
         self.c3d = C3D_features(weights_dict['c3d'])
         print("Done!")
         print("Loading anomaly ANN weights...")
-        self.ann = anomaly_ann(weights_dict['ann'])
+        self.ann = anomaly_ann(weights_dict['ann'], no_sigmoid)
         print("Done!")
 
     def predict(self, block):
