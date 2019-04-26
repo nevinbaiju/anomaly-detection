@@ -26,9 +26,9 @@ alert_threshold = 0.6
 verbose = True
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--vid_base_path", type=str, default='/media/nevin/01D247D89A1BD8F0/dataset/UCF_Crimes/Videos/Training_Normal_Videos_Anomaly')
-parser.add_argument("--features_base_path", type=str, default='/home/nevin/nevin/datasets/anomaly detection/features/c3d/Training_Normal_Videos_Anomaly')
-parser.add_argument("--vid_file", type=str, default='RoadAccidents022_x264')
+parser.add_argument("--vid_base_path", type=str, default='SampleVideos/videos')
+parser.add_argument("--features_base_path", type=str, default='SampleVideos/features')
+parser.add_argument("--vid_file", type=str, default='RoadAccidents022_x264.mp4')
 parser.add_argument("--weights_path", type=str, default='weights/weights_L1L2.mat')
 args = parser.parse_args()
 
@@ -40,14 +40,15 @@ features_base_path = args.features_base_path
 vid_file = args.vid_file
 features_base_path = args.features_base_path
 
-vid_path = os.path.join(vid_base_path, vid_file+'.mp4')
-feature_path = os.path.join(features_base_path, vid_file+'.csv')
+vid_path = os.path.join(vid_base_path, vid_file)
+feature_file = vid_file.split('.')[0] + '.csv'
+feature_path = os.path.join(features_base_path, feature_file)
 
 assert (os.path.exists(vid_path)), "Video, '{}' does not exist".format(vid_path)
 assert (os.path.exists(feature_path)), "Feature file, '{}' does not exist".format(feature_path)
 
-vid = generate_block(os.path.join(vid_base_path, vid_file+'.mp4'), 1, return_frame=True)
-features = generate_tensor(os.path.join(features_base_path, vid_file+'.csv'))
+vid = generate_block(vid_path, 1, return_frame=True)
+features = generate_tensor(feature_path)
 weights_path = args.weights_path
 
 detector = anomaly_ann(weights_path, no_sigmoid=True)
@@ -56,7 +57,7 @@ cv2.namedWindow("preview")
 font = cv2.FONT_HERSHEY_SIMPLEX
 text_pos = (10, 30)
 
-min, max = get_min_max(vid_file+'.csv')
+min, max = get_min_max(feature_file)
 
 for i, block in enumerate(vid):
     score = detector(features[i]).item()
@@ -65,11 +66,12 @@ for i, block in enumerate(vid):
         score = -score
     elif(score>1):
         score = 1
-    score = score*100
+    disp_score = score*100
     print(score)
     preview = block['preview']
     for frame in preview:
-        cv2.putText(frame, "%d percent"%score, text_pos, font, 1, (255, 255, 255))
+        frame = cv2.resize(frame, (500, 360))
+        cv2.putText(frame, "%d percent"%disp_score, text_pos, font, 1, (255, 255, 255))
         cv2.imshow('preview', frame)
         key = cv2.waitKey(20)
         if(key==27):

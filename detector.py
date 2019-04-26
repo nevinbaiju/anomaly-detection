@@ -30,9 +30,10 @@ if filename == '0':
 
 #db_access = db()
 vid = generate_block(filename, 1, return_frame=True)
-min, max = get_min_max(filename)
+csv_index = filename.split('/')[-1].split('.')[0]+'.csv'
+min, max = get_min_max(csv_index)
 
-detector = anomaly_detector(weights_dict, no_sigmoid)
+detector = anomaly_detector(weights_dict, no_sigmoid='True')
 
 cv2.namedWindow("preview")
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -41,16 +42,17 @@ text_pos = (10, 30)
 for i, block in enumerate(vid):
     score = detector.predict(block['block'])
     score = (score-min)/(max-min)
+    disp_score = score*100
     if(score < 0):
         score = -score
     elif(score>1):
         score = 1
-    score = score*100
+    disp_score = score*100
     print(score)
     preview = block['preview']
     for frame in preview:
         frame = cv2.resize(frame, (500, 360))
-        cv2.putText(frame, "%d percent"%score, text_pos, font, 1, (255, 255, 255))
+        cv2.putText(frame, "%d percent"%disp_score, text_pos, font, 1, (255, 255, 255))
         cv2.imshow('preview', frame)
         key = cv2.waitKey(20)
         if(key==27):
