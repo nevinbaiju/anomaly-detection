@@ -1,12 +1,17 @@
-from models.anomaly_ann import anomaly_ann
+"""
+This is a script for processing the C3D features already extracted,
+for demonstrating on light weight devices.
+THIS SCRIPT IS FOR DEMONSTATION PURPOSES ONLY.
+"""
+
 import pandas as pd
 import torch
-from misc.min_max import get_min_max
-from misc.process_score import process_score
+import cv2
 
-#from scripts.db import db
+from models.anomaly_ann import anomaly_ann
+from misc.min_max import get_min_max
+from misc.process_score import score_processor
 from scripts.read_video import generate_block
-#from scripts.mail import send_mail
 
 import time
 import datetime
@@ -14,23 +19,28 @@ import multiprocessing
 import argparse
 import os
 
-import cv2
-
 def generate_tensor(filename):
+    """
+    Function for reading the processed features from a csv file.
+    """
     print(filename)
     features = pd.read_csv(filename, header=None).drop([0], axis=1).values
     features_tensor = torch.tensor(features, dtype=torch.float)
     return features_tensor
 
-base_threshold = 0.3
-alert_threshold = 0.6
+base_threshold = 0.55 # Threshold for logging in the db.
+alert_threshold = 0.7 # Threshold for sending notification to user.
 verbose = True
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--vid_base_path", type=str, default='SampleVideos/videos')
-parser.add_argument("--features_base_path", type=str, default='SampleVideos/features')
-parser.add_argument("--vid_file", type=str, default='RoadAccidents022_x264.mp4')
-parser.add_argument("--weights_path", type=str, default='weights/weights_L1L2.mat')
+parser.add_argument("--vid_base_path", type=str, default='SampleVideos/videos',\
+                    help='Folder containing the video file.')
+parser.add_argument("--features_base_path", type=str, default='SampleVideos/features',\
+                    help='Folder containing the features path.')
+parser.add_argument("--vid_file", type=str, default='RoadAccidents022_x264.mp4',\
+                    help='Filename of the video.')
+parser.add_argument("--weights_path", type=str, default='weights/weights_L1L2.mat',\
+                    help='Path of the .mat file containing the weights of ANN.')
 args = parser.parse_args()
 
 filename = args.vid_file
@@ -57,6 +67,7 @@ detector = anomaly_ann(weights_path, no_sigmoid=True)
 cv2.namedWindow("preview")
 font = cv2.FONT_HERSHEY_SIMPLEX
 text_pos = (10, 30)
+score_processor = score_processor(base_threshold, alert_threshold, True)
 
 min, max = get_min_max(feature_file)
 
@@ -67,7 +78,7 @@ for i, block in enumerate(vid):
         score = -score
     elif(score>1):
         score = 1
-    process_score(score)
+    score_processor.process_score(score)
     disp_score = score*100
     print(score)
     preview = block['preview']

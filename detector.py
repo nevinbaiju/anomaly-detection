@@ -1,10 +1,8 @@
 from models.anomaly_detector import anomaly_detector
 
-#from scripts.db import db
 from scripts.read_video import generate_block
 from misc.min_max import get_min_max
-from misc.process_score import process_score
-#from scripts.mail import send_mail
+from misc.process_score import score_processor
 
 import time
 import datetime
@@ -29,12 +27,12 @@ no_sigmoid = args.no_sigmoid
 if filename == '0':
     filename = 0
 
-#db_access = db()
 vid = generate_block(filename, 1, return_frame=True)
 csv_index = filename.split('/')[-1].split('.')[0]+'.csv'
 min, max = get_min_max(csv_index)
 
 detector = anomaly_detector(weights_dict, no_sigmoid='True')
+score_processor = score_processor(base_threshold, alert_threshold, True)
 
 cv2.namedWindow("preview")
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -42,15 +40,16 @@ text_pos = (10, 30)
 
 for i, block in enumerate(vid):
     score = detector.predict(block['block'])
+    print(score)
     score = (score-min)/(max-min)
     disp_score = score*100
     if(score < 0):
         score = -score
     elif(score>1):
         score = 1
-    process_score(score)
+    score_processor.process_score(score)
     disp_score = score*100
-    print(score)
+    #print(score)
     preview = block['preview']
     for frame in preview:
         frame = cv2.resize(frame, (500, 360))
