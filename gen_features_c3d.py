@@ -7,7 +7,7 @@ from models.anomaly_ann import anomaly_ann
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from scripts.read_video import generate_block
+from utils.read_video import generate_block
 import time
 import os
 import argparse

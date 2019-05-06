@@ -9,9 +9,10 @@ import torch
 import cv2
 
 from models.anomaly_ann import anomaly_ann
-from misc.min_max import get_min_max
-from misc.process_score import score_processor
-from scripts.read_video import generate_block
+
+from utils.min_max import get_min_max
+from utils.process_score import score_processor
+from utils.read_video import generate_block
 
 import time
 import datetime

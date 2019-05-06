@@ -1,6 +1,6 @@
 import torch
 import cv2
-from misc.mean import get_mean, get_std
+from .mean import get_mean, get_std
 from torchvision.transforms import Normalize, Compose, Resize, ToPILImage, ToTensor
 import numpy as np
 

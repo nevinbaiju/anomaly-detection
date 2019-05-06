@@ -6,4 +6,4 @@ SampleVideos/*
 results/*
 .ipynb_checkpoints/*
 **.pyc
-
+notebooks/*

@@ -6,7 +6,7 @@ from models.anomaly_ann import anomaly_ann
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scripts.read_video import generate_block
+from utils.read_video import generate_block
 import time
 import os
 import argparse
@@ -14,17 +14,17 @@ import argparse
 def plot_score(score_arr, base_path, filename):
 	"""
 	Function to plot the final scores obtained from the anomaly ann.
-	
+
 	Parameters
 	----------
 	score_arr       :list
 					List of the anomaly scores of segments in order
 	base_path       :str
-					Base path of the folder in which the plot images 
+					Base path of the folder in which the plot images
 					will be saved.
 	filename        :str
 					Filename of the plot figure.
-	
+
 	Returns
 	-------
 	None
@@ -44,6 +44,21 @@ def plot_score(score_arr, base_path, filename):
 	plt.close('all')
 
 def rolling_mean(sequence, roll_length):
+	"""
+	Function to get the sequence after taking the rolling mean.
+
+	Parameters
+	----------
+	sequence       :list
+					List of values to be processed.
+	roll_length    :list
+					Length of the roll.
+
+	Returns
+	-------
+	rolled_seq     :list
+					Result after applying the rolling mean.
+	"""
     new_seq = [0 for i in range(roll_length-1)]
     new_seq = new_seq+sequence
     rolled_seq = []
@@ -57,7 +72,7 @@ def predict_scores(c3d, anomaly_ann, filename, seg_length, base_path):
 	"""
 	Function to predict the anomaly scores of a video and plot the scores
 	by iterating over the segment length of the video.
-	
+
 	Parameters
 	----------
 	c3d             :torch.nn.Module
@@ -71,7 +86,7 @@ def predict_scores(c3d, anomaly_ann, filename, seg_length, base_path):
 					 multipliers of 16.
 	base_path       :str
 					 Path of the folder containing the video files.
-	
+
 	Returns
 	-------
 	None
@@ -95,7 +110,7 @@ def iterate_folder(base_path, c3d, anomaly_ann):
 	"""
 	Function to iterate over the video files in the given folder
 	and call the function to predict the anomaly for each.
-	
+
 	Parameters
 	----------
 	base_path       :str
@@ -104,7 +119,7 @@ def iterate_folder(base_path, c3d, anomaly_ann):
 					 The c3d feature extraction model.
 	anomaly_ann     :torch.nn.Module
 					 The anomaly ann model that predicts the anomaly scores.
-	
+
 	Returns
 	-------
 	None
@@ -123,9 +138,12 @@ def iterate_folder(base_path, c3d, anomaly_ann):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--base_path", type=str, default='SampleVideos/videos')
-parser.add_argument("--c3d_weights", type=str, default='weights/c3d.pickle')
-parser.add_argument("--ann_weights", type=str, default='weights/weights_L1L2.mat')
+parser.add_argument("--base_path", type=str, default='SampleVideos/videos', \
+					help='The folder path containing the video files.')
+parser.add_argument("--c3d_weights", type=str, default='weights/c3d.pickle', \
+					help='Path of the .pth weights file.')
+parser.add_argument("--ann_weights", type=str, default='weights/weights_L1L2.mat', \
+					help='Path of the .mat weights file of ANN.')
 args = parser.parse_args()
 
 base_path = args.base_path
