@@ -4,7 +4,7 @@ from __future__ import print_function
 
 from models.ResNet_3D.model import generate_model
 from models.ResNet_3D.opts import parse_opts
-from models.ResNet_3D.mean import get_mean, get_std
+from utils.mean import get_mean, get_std
 
 import torch
 
