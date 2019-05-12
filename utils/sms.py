@@ -22,15 +22,14 @@ def sendPostRequest(reqUrl, apiKey, secretKey, useType, phoneNo, senderId, textM
 
 # get response
 def send_sms(to_mobile, timestamp):
-	provided_api_key = ''
-	provided_secret = ''
+	provided_api_key = 'NZ8GZ6YATUDSULH1NEU5MYN5ZUFKRF0G'
+	provided_secret = 'UBCQCQUB8M2DQUEE'
 	prod_stage = 'stage'
-	active_sender_id = ''
+	active_sender_id = 'Nvn'
 	message_text = "An anomaly has occured under Cam 1 at {}, please attend to it. \n -vision.ai".format(timestamp)
 
 	response = sendPostRequest(URL, provided_api_key, provided_secret, prod_stage, to_mobile, active_sender_id, message_text)
-	if(response.text['status'] == 'success'):
-		print("SMS successfully send.")
+	print(response.text)
 
 if __name__ == '__main__':
-	send_sms("", "1:00 PM 12th May.")
+	send_sms("+918139868986", "1:00 PM 12th May.")
