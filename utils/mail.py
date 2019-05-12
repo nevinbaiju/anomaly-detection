@@ -27,12 +27,15 @@ def send_mail(sender, to, score , timestamp):
 	msg.attach(MIMEText(email_body, 'plain'))
 
 	email_content = msg.as_string()
-	server = smtplib.SMTP('smtp.gmail.com:587')
-	server.starttls()
-	server.login(sender_email_address, sender_email_password)
+	try:
+		server = smtplib.SMTP('smtp.gmail.com:587')
+		server.starttls()
+		server.login(sender_email_address, sender_email_password)
 
-	server.sendmail(sender_email_address, receiver_email_address, email_content)
-	server.quit()
+		server.sendmail(sender_email_address, receiver_email_address, email_content)
+		server.quit()
+	except Exception as E:
+		print("e-mail failed, network currently unavailable.")
 
 if __name__ == '__main__':
-	mail('vision.ai.updates@gmail.com', 'nevinbaiju@gmail.com', 0.5, '2019-03-29 11:40:12')
+	send_mail('vision.ai.updates@gmail.com', 'nevinbaiju@gmail.com', 0.5, '2019-03-29 11:40:12')
